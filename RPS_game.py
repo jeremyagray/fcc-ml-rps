@@ -20,9 +20,13 @@ def play(player1, player2, num_games, verbose=False):
                                                        and p2_play == "P"):
             results["p1"] += 1
             winner = "Player 1 wins."
-        elif p2_play == "P" and p1_play == "R" or p2_play == "R" and p1_play == "S" or p2_play == "S" and p1_play == "P":
+        elif ((p2_play == "P" and p1_play == "R")
+              or (p2_play == "R" and p1_play == "S")
+              or (p2_play == "S" and p1_play == "P")):
             results["p2"] += 1
             winner = "Player 2 wins."
+        else:
+            raise ValueError
 
         if verbose:
             print("Player 1:", p1_play, "| Player 2:", p2_play)
@@ -45,6 +49,7 @@ def play(player1, player2, num_games, verbose=False):
     return (win_rate)
 
 
+# A player that plays a sequence of 5 plays.
 def quincy(prev_play, counter=[0]):
 
     counter[0] += 1
@@ -52,6 +57,7 @@ def quincy(prev_play, counter=[0]):
     return choices[counter[0] % len(choices)]
 
 
+# A player that beats the most common play in the last ten.
 def mrugesh(prev_opponent_play, opponent_history=[]):
     opponent_history.append(prev_opponent_play)
     last_ten = opponent_history[-10:]
@@ -64,6 +70,7 @@ def mrugesh(prev_opponent_play, opponent_history=[]):
     return ideal_response[most_frequent]
 
 
+# A player that beats your last play.
 def kris(prev_opponent_play):
     if prev_opponent_play == '':
         prev_opponent_play = "R"
@@ -71,6 +78,8 @@ def kris(prev_opponent_play):
     return ideal_response[prev_opponent_play]
 
 
+# A second order Markov player that beats the second play of the most
+# played possible current two play sequence.
 def abbey(prev_opponent_play,
           opponent_history=[],
           play_order=[{
@@ -85,14 +94,17 @@ def abbey(prev_opponent_play,
               "SS": 0,
           }]):
 
+    # Store opponent history; if none, use R.
     if not prev_opponent_play:
         prev_opponent_play = 'R'
     opponent_history.append(prev_opponent_play)
 
+    # Create the last two key and increment its value.
     last_two = "".join(opponent_history[-2:])
     if len(last_two) == 2:
         play_order[0][last_two] += 1
 
+    # Construct the possible next plays.
     potential_plays = [
         prev_opponent_play + "R",
         prev_opponent_play + "P",
@@ -106,6 +118,7 @@ def abbey(prev_opponent_play,
 
     prediction = max(sub_order, key=sub_order.get)[-1:]
 
+    # Return the play to beat the prediction.
     ideal_response = {'P': 'S', 'R': 'P', 'S': 'R'}
     return ideal_response[prediction]
 
