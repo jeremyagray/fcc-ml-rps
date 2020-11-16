@@ -1,3 +1,4 @@
+import itertools
 import random
 import re
 import traceback
@@ -135,20 +136,22 @@ def player(prev_play, player_history=[], opponent_history=[]):
         # print('play:  {} q:  {} m:  {}'.format(len(qplays), choice, guess))
         return guess
 
-    # kris plays to beat your last play
+    # Kris plays to beat your last play.  He assumes you played R last
+    # on first play.
     def anti_kris(mh, oh):
         if len(mh) == 0:
-            return random.choice(list(beat.keys()))
+            return beat[beat['R']]
         else:
             if oh[-1][1] == mh[-1][1]:
                 return random.choice(list(beat.keys()))
             else:
                 return beat[beat[mh[-1][1]]]
 
-    # mrugesh plays to beat my most common play in the last ten
+    # Mrugesh plays to beat your most common play in the last ten.  He
+    # assumes your most common is S on the first play.
     def anti_mrugesh(mh):
         if len(mh) == 0:
-            return random.choice(list(beat.keys()))
+            return beat[beat['S']]
         else:
             last = []
             for play in mh[-10:]:
@@ -196,21 +199,83 @@ def player(prev_play, player_history=[], opponent_history=[]):
         else:
             return random.choice(list(beat.keys()))
 
+    def markov_history(n, hist):
+        if len(hist) < n:
+            return None
+
+        num_plays = markov_plays(n)
+        history = list(hist)
+
+        for i, play in enumerate(history):
+            seq = history[i:i + n]
+            if len(seq) == n:
+                num_plays[''.join(seq)] = num_plays[''.join(seq)] + 1
+
+        return num_plays
+
+    def markov_plays(n):
+        plays = {}
+
+        for item in tuple(itertools.product(tuple(beat.keys()), repeat=n)):
+            plays[''.join(item)] = 0
+
+        return plays
+
+    def markov_possible_plays(n, hist):
+        if len(hist) < (n - 1):
+            return None
+
+        chain = hist[-(n - 1):]
+
+        plays = {}
+        for play in tuple(beat.keys()):
+            plays[chain + play] = 0
+
+        return plays
+
+    def markov(n, hist, threshold=0):
+        if len(hist) < n:
+            return random.choice(list(beat.keys()))
+
+        if (random.random() < threshold):
+            return random.choice(list(beat.keys()))
+
+        history = markov_history(n, hist)
+        possible_plays = markov_possible_plays(n, hist)
+
+        for (k, v) in possible_plays.items():
+            possible_plays[k] = history[k]
+
+        return beat[max(possible_plays, key=possible_plays.get)[-1:]]
+
     opponent = get_opponent()
 
     if prev_play != '':
         opponent_history.append((opponent, prev_play))
 
-    if get_opponent() == 'quincy':
-        guess = anti_quincy(opponent_history)
-    elif get_opponent() == 'abbey':
-        guess = anti_abbey(player_history)
-    elif get_opponent() == 'kris':
-        guess = anti_kris(player_history, opponent_history)
-    elif get_opponent() == 'mrugesh':
-        guess = anti_mrugesh(player_history)
-    else:
-        guess = rand()
+    # if get_opponent() == 'quincy':
+    #     guess = anti_quincy(opponent_history)
+    # elif get_opponent() == 'abbey':
+    #     guess = anti_abbey(player_history)
+    # elif get_opponent() == 'kris':
+    #     guess = anti_kris(player_history, opponent_history)
+    # elif get_opponent() == 'mrugesh':
+    #     guess = anti_mrugesh(player_history)
+    # else:
+    #     guess = rand()
+
+    guess = markov(5,
+                   ''.join([x[1] for x in
+                            opponent_history[
+                                -(len(opponent_history) % 1000):]]),
+                   threshold=0)
+
+    if get_opponent() == 'abbey':
+        guess = beat[markov(2,
+                            ''.join([x[1] for x in
+                                     player_history[
+                                         -(len(player_history) % 1000):]]),
+                            threshold=0)]
 
     player_history.append((opponent, guess))
 
