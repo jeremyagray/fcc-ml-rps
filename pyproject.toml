@@ -1,0 +1,12 @@
+[tool]
+[tool.poetry]
+description = "FCC ML Rock Paper Scissors Project"
+authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
+name = "fcc-ml-rps"
+version = "0.2.0"
+[tool.poetry.dependencies]
+python = "^3.8"
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-flakes = "*"
+pytest-flake8 = "*"
