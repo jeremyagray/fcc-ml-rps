@@ -3,11 +3,7 @@ import random
 import re
 import traceback
 
-beat = {
-    'R': 'P',
-    'P': 'S',
-    'S': 'R'
-}
+beat = {"R": "P", "P": "S", "S": "R"}
 
 
 class Player:
@@ -17,47 +13,46 @@ class Player:
         self.record = []
 
     def result(me, him):
-        if ((me not in beat) or (him not in beat)):
+        if (me not in beat) or (him not in beat):
             raise ValueError
         elif me == him:
-            return 'D'
+            return "D"
         elif me == beat[him]:
-            return 'W'
+            return "W"
         elif beat[me] == him:
-            return 'L'
+            return "L"
         else:
             raise ValueError
 
 
 def player(prev_play, player_history=[], opponent_history=[]):
-
     def result(me, him):
-        if ((me not in beat) or (him not in beat)):
+        if (me not in beat) or (him not in beat):
             raise ValueError
         elif me == him:
-            return 'D'
+            return "D"
         elif me == beat[him]:
-            return 'W'
+            return "W"
         elif beat[me] == him:
-            return 'L'
+            return "L"
         else:
             raise ValueError
 
     def get_opponent():
         for line in traceback.format_stack():
-            whole = ' '.join(line.strip().split('\n'))
+            whole = " ".join(line.strip().split("\n"))
             # print(whole)
-            match = re.search(r'(quincy|abbey|kris|mrugesh)', whole)
+            match = re.search(r"(quincy|abbey|kris|mrugesh)", whole)
             if match:
                 return match.group(1)
 
     def get_winner(play):
-        if play == 'R':
-            return 'P'
-        elif play == 'P':
-            return 'S'
-        elif play == 'S':
-            return 'R'
+        if play == "R":
+            return "P"
+        elif play == "P":
+            return "S"
+        elif play == "S":
+            return "R"
         else:
             raise ValueError
 
@@ -79,7 +74,7 @@ def player(prev_play, player_history=[], opponent_history=[]):
                 counts[play] = 1
 
         max = 0
-        play = ''
+        play = ""
 
         for (k, v) in counts.items():
             if v > max:
@@ -89,17 +84,17 @@ def player(prev_play, player_history=[], opponent_history=[]):
         return play
 
     def ars(me, him):
-        choices = ['R', 'P', 'S']
+        choices = ["R", "P", "S"]
         go_random = random.choice([0])
 
-        if result(me, him) == 'D':
+        if result(me, him) == "D":
             return random.choice(choices)
-        elif result(me, him) == 'W':
+        elif result(me, him) == "W":
             if go_random:
                 return random.choice(choices)
             else:
                 return get_winner(him)
-        elif result(me, him) == 'L':
+        elif result(me, him) == "L":
             if go_random:
                 return random.choice(choices)
             else:
@@ -112,25 +107,25 @@ def player(prev_play, player_history=[], opponent_history=[]):
         return mode(plays)
 
     def rand():
-        return random.choice(['R', 'P', 'S'])
+        return random.choice(["R", "P", "S"])
 
     def rock():
-        return 'R'
+        return "R"
 
     def paper():
-        return 'P'
+        return "P"
 
     def scissor():
-        return 'S'
+        return "S"
 
     # quincy plays a sequence
     def anti_quincy(oh):
         qplays = []
         for play in oh:
-            if play[0] == 'quincy':
+            if play[0] == "quincy":
                 qplays.append(play)
 
-        choices = ['R', 'R', 'P', 'P', 'S']
+        choices = ["R", "R", "P", "P", "S"]
         choice = choices[(len(qplays) + 1) % 5]
         guess = beat[choice]
         # print('play:  {} q:  {} m:  {}'.format(len(qplays), choice, guess))
@@ -140,7 +135,7 @@ def player(prev_play, player_history=[], opponent_history=[]):
     # on first play.
     def anti_kris(mh, oh):
         if len(mh) == 0:
-            return beat[beat['R']]
+            return beat[beat["R"]]
         else:
             if oh[-1][1] == mh[-1][1]:
                 return random.choice(list(beat.keys()))
@@ -151,7 +146,7 @@ def player(prev_play, player_history=[], opponent_history=[]):
     # assumes your most common is S on the first play.
     def anti_mrugesh(mh):
         if len(mh) == 0:
-            return beat[beat['S']]
+            return beat[beat["S"]]
         else:
             last = []
             for play in mh[-10:]:
@@ -159,8 +154,8 @@ def player(prev_play, player_history=[], opponent_history=[]):
 
             mode = max(set(last), key=last.count)
 
-            if mode == '':
-                mode = 'R'
+            if mode == "":
+                mode = "R"
 
             return beat[beat[mode]]
 
@@ -168,21 +163,21 @@ def player(prev_play, player_history=[], opponent_history=[]):
     # played possible current two play sequence.
     def anti_abbey(mh):
         plays = {
-            'RR': 0,
-            'RP': 0,
-            'RS': 0,
-            'PR': 0,
-            'PP': 0,
-            'PS': 0,
-            'SR': 0,
-            'SP': 0,
-            'SS': 0,
+            "RR": 0,
+            "RP": 0,
+            "RS": 0,
+            "PR": 0,
+            "PP": 0,
+            "PS": 0,
+            "SR": 0,
+            "SP": 0,
+            "SS": 0,
         }
 
         if len(mh) >= 2:
             last = None
             for i, play in enumerate(mh):
-                if play[0] == 'abbey':
+                if play[0] == "abbey":
                     if last is None:
                         last = play[1]
                     else:
@@ -190,9 +185,9 @@ def player(prev_play, player_history=[], opponent_history=[]):
                         last = play[1]
 
             cplays = {
-                play[1] + 'R': plays[play[1] + 'R'],
-                play[1] + 'P': plays[play[1] + 'P'],
-                play[1] + 'S': plays[play[1] + 'S']
+                play[1] + "R": plays[play[1] + "R"],
+                play[1] + "P": plays[play[1] + "P"],
+                play[1] + "S": plays[play[1] + "S"],
             }
 
             return beat[beat[max(cplays, key=cplays.get)[-1:]]]
@@ -207,9 +202,9 @@ def player(prev_play, player_history=[], opponent_history=[]):
         history = list(hist)
 
         for i, play in enumerate(history):
-            seq = history[i:i + n]
+            seq = history[i : i + n]
             if len(seq) == n:
-                num_plays[''.join(seq)] = num_plays[''.join(seq)] + 1
+                num_plays["".join(seq)] = num_plays["".join(seq)] + 1
 
         return num_plays
 
@@ -217,7 +212,7 @@ def player(prev_play, player_history=[], opponent_history=[]):
         plays = {}
 
         for item in tuple(itertools.product(tuple(beat.keys()), repeat=n)):
-            plays[''.join(item)] = 0
+            plays["".join(item)] = 0
 
         return plays
 
@@ -225,7 +220,7 @@ def player(prev_play, player_history=[], opponent_history=[]):
         if len(hist) < (n - 1):
             return None
 
-        chain = hist[-(n - 1):]
+        chain = hist[-(n - 1) :]
 
         plays = {}
         for play in tuple(beat.keys()):
@@ -237,7 +232,7 @@ def player(prev_play, player_history=[], opponent_history=[]):
         if len(hist) < n:
             return random.choice(list(beat.keys()))
 
-        if (random.random() < threshold):
+        if random.random() < threshold:
             return random.choice(list(beat.keys()))
 
         history = markov_history(n, hist)
@@ -250,7 +245,7 @@ def player(prev_play, player_history=[], opponent_history=[]):
 
     opponent = get_opponent()
 
-    if prev_play != '':
+    if prev_play != "":
         opponent_history.append((opponent, prev_play))
 
     # if get_opponent() == 'quincy':
@@ -264,18 +259,22 @@ def player(prev_play, player_history=[], opponent_history=[]):
     # else:
     #     guess = rand()
 
-    guess = markov(5,
-                   ''.join([x[1] for x in
-                            opponent_history[
-                                -(len(opponent_history) % 1000):]]),
-                   threshold=0)
+    guess = markov(
+        5,
+        "".join([x[1] for x in opponent_history[-(len(opponent_history) % 1000) :]]),
+        threshold=0,
+    )
 
-    if get_opponent() == 'abbey':
-        guess = beat[markov(2,
-                            ''.join([x[1] for x in
-                                     player_history[
-                                         -(len(player_history) % 1000):]]),
-                            threshold=0)]
+    if get_opponent() == "abbey":
+        guess = beat[
+            markov(
+                2,
+                "".join(
+                    [x[1] for x in player_history[-(len(player_history) % 1000) :]]
+                ),
+                threshold=0,
+            )
+        ]
 
     player_history.append((opponent, guess))
 
